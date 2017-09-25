@@ -3,9 +3,7 @@
   "version": "0.0.1",
   "description": "Simple Node-based Raspberry PI webserver. Experimental.",
   "main": "index.js",
-  "scripts": {
-    "test": "test"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git://github.com/dasbente/pi-webserver.git"
@@ -18,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/dasbente/pi-webserver/issues"
   },
-  "homepage": "https://github.com/dasbente/pi-webserver#readme"
+  "homepage": "https://github.com/dasbente/pi-webserver#readme",
+  "dependencies": {
+    "express": "^4.15.5"
+  }
 }

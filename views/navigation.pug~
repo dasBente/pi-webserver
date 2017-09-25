@@ -1,0 +1,22 @@
+nav(class="navbar navbar-expand-md navbar-dark bg-dark")
+  a(class="navbar-brand" href="#")= dasBente's Webserver
+    
+  button(
+    class="navbar-toggler" 
+    type="button" 
+    data-toggle="collapse" 
+    data-target="#dasbenteNavbar"
+    aria-controls="dasbenteNavbar"
+    aria-expanded="false"
+    aria-label="Navigation umschalten"
+  )
+    span(class="navbar-toggler-icon")
+    
+  div(class="collapse navbar-collapse" id="dasbenteNavbar")
+    ul(class="navbar-nav mr-auto")
+      // TODO: Automate
+      li(class="nav-item active")
+        a(class="nav-link" href="#")= Home
+        
+  
+  

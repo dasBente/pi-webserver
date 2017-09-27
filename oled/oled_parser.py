@@ -10,14 +10,6 @@ from luma.oled.device import ssd1306
 serial = i2c(port=1, address=0x3C)
 device = ssd1306(serial, rotate = 0)
 
-def main():
-    for line in sys.stdin:
-        cmds = map(cmd_parse, line.split(' '))
-        map(oled_draw, cmds)
-
-# Run programm (if not imported for whatever reason)
-if (__name__ == "__main__"):
-    main()
 
 # Parses commands for the OLED controller
 #  All commands are words of the form cmd:par1,par2,...parN
@@ -53,4 +45,12 @@ def points(args):
             color="white"
 
         draw.point(x, y, fill=color)
-    
+
+def main():
+    for line in sys.stdin:
+        cmds = map(cmd_parse, line.split(' '))
+        map(oled_draw, cmds)
+
+# Run programm (if not imported for whatever reason)
+if (__name__ == "__main__"):
+    main()

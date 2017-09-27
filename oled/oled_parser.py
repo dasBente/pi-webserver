@@ -32,10 +32,10 @@ def oled_draw(command, draw):
 
 # Translate a given color number into a color
 def get_color(color):
-    if color == "white":
-        color = "white"
-    else:
+    if color == 0:
         color = "black"
+    else:
+        color = "white"
 
     return color
         
@@ -45,21 +45,21 @@ def get_color(color):
 #  the lists first element
 def points(args, draw):
     color = get_color(args.pop(0))
-    draw.point(map(int,args), fill = color)
+    draw.point([int(x) for x in args], fill = color)
 
 # Draw a line using a list of x and y coordinates as
 #  well as a color (1. list element) and a width (2. list element)
 def line(args, draw):
     color = get_color(args.pop(0))
     w = int(args.pop(0))
-    draw.line(args, fill = color, width = w)
+    draw.line([int(x) for x in args], fill = color, width = w)
 
 # Draw a rectangle using fill color, outline color and two points for the bounding box
 #  r:f,o,x1,y1,x2,y2
 def rectangle(args, draw):
     incolor = get_color(args.pop(0))
     outcolor = get_color(args.pop(0))
-    draw.rectangle(args, fill = incolor, outline = outcolor) 
+    draw.rectangle([int(x) for x in args], fill = incolor, outline = outcolor) 
     
 ### Main function ###
     

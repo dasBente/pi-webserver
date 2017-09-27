@@ -23,25 +23,46 @@ def oled_draw(command, draw):
     name = command[0]
     params = command[1]
 
-    points(params, draw)
+    if name == "line" or name == "l":
+        line(params, draw)
+    elif name == "rectangle" or name == "r":
+        rectangle(params, draw)
+    else:
+        points(params, draw)
 
+# Translate a given color number into a color
+def get_color(color):
+    if color == "white":
+        color = "white"
+    else:
+        color = "black"
+
+    return color
+        
 ### Methods for rendering to the OLED ###
 
-# Draw one or more points using triples (x, y, color)
+# Draw one or more points using a list of x and y coordinates and a color as
+#  the lists first element
 def points(args, draw):
-    while len(args) >= 3:
-        x = int(args.pop(0))
-        y = int(args.pop(0))
-        color = args.pop(0)
+    color = get_color(args.pop(0))
+    draw.point(map(int,args), fill = color)
 
-        if color == 0:
-            color="black"
-        else:
-            color="white"
+# Draw a line using a list of x and y coordinates as
+#  well as a color (1. list element) and a width (2. list element)
+def line(args, draw):
+    color = get_color(args.pop(0))
+    w = int(args.pop(0))
+    draw.line(args, fill = color, width = w)
 
-        print("Point at ("+ str(x) +", "+ str(y) +")")
-        draw.point([(x, y)], fill=color)
-
+# Draw a rectangle using fill color, outline color and two points for the bounding box
+#  r:f,o,x1,y1,x2,y2
+def rectangle(args, draw):
+    incolor = get_color(args.pop(0))
+    outcolor = get_color(args.pop(0))
+    draw.rectangle(args, fill = incolor, outline = outcolor) 
+    
+### Main function ###
+    
 def main():
     for line in sys.stdin:
         with canvas(device) as draw:

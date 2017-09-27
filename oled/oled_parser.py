@@ -17,26 +17,21 @@ def cmd_parse(command):
     command = command.split(":")
     return (command[0], command[1].split(","))
 
-draw = canvas(device) 
 
 # Draw on the OLED according to the given command
-def oled_draw(command):
+def oled_draw(command, draw):
     name = command[0]
     params = command[1]
 
-    #with canvas(device) as draw:
-    # Draw depending on the given command 
-
-    # default case: draw points
-    points(params)
+    points(params, draw)
 
 ### Methods for rendering to the OLED ###
 
 # Draw one or more points using triples (x, y, color)
-def points(args):
+def points(args, draw):
     while len(args) >= 3:
-        x = args.pop(0)
-        y = args.pop(0)
+        x = int(args.pop(0))
+        y = int(args.pop(0))
         color = args.pop(0)
 
         if color == 0:
@@ -44,12 +39,15 @@ def points(args):
         else:
             color="white"
 
-        draw.point(x, y, fill=color)
+        print("Point at ("+ str(x) +", "+ str(y) +")")
+        draw.point([(x, y)], fill=color)
 
 def main():
     for line in sys.stdin:
-        cmds = map(cmd_parse, line.split(' '))
-        map(oled_draw, cmds)
+        with canvas(device) as draw:
+        #    draw.text((20,20), line, fill="white")
+            for cmd in (cmd for cmd in line.split(" ") if cmd != ""):
+                oled_draw(cmd_parse(cmd), draw)
 
 # Run programm (if not imported for whatever reason)
 if (__name__ == "__main__"):

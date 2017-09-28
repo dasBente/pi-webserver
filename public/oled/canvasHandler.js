@@ -8,14 +8,12 @@ $(function() {
     // Attach canvas controller to the canvas
     var contr = CanvasController($('canvas'), OLED_COLS, OLED_ROWS);
 
-    var url = "ws:"+ window.location.href.split(':')[1] +":8080/oled"
+    var url = "ws:"+ window.location.href.split(':')[1] +":8090/oled"
     var cli = CanvasClient(url);
 
     // Initialize Event handlers
     contr.initEventHandler(cli);
     cli.initEventHandler(contr);
-    
-    contr.renderBuffer();
 });
 
 /* Creates a canvas controller which initializes and manages the canvas */
@@ -113,17 +111,26 @@ function CanvasController(canvas, cols, rows) {
 /* Creates a Websocket client to communicate with a server */
 function CanvasClient(url) {
     var ws = new WebSocket(url);
+
+    /* Send empty message to server to get update */
+    var update = function () {
+	ws.send(JSON.stringify({
+	    on: [],
+	    off: []
+	}));
+    }
     
     return {
+	
 	/* Process a canvas buffer and send it to the server*/
 	sendBuffer: function (buffer) {
 	    var on = [], off = [];
 
 	    cellwise(buffer, function (x, y) {
 		if (buffer[x][y] == 0) {
-		    off.push(x,y);
+		    off.push([x,y]);
 		} else if (buffer[x][y] == 1)  {
-		    on.push(x,y);
+		    on.push([x,y]);
 		}
 
 		// Delete buffer again
@@ -132,11 +139,10 @@ function CanvasClient(url) {
 
 	    if (on.length + off.length > 0) {
 		var msg = {
-		    type: "draw",
 		    on: on,
 		    off: off
 		};
-
+		
 		ws.send(JSON.stringify(msg));
 	    }
 	},
@@ -146,10 +152,12 @@ function CanvasClient(url) {
 	    ws.onmessage = function (e) {
 		var msg = JSON.parse(e.data);
 
-		if (msg.type == 'screendata') {
-		    screen = msg.screen;
-		    controller.renderBuffer();
-		}
+		screen = msg.screen;
+		controller.renderBuffer();
+	    }
+
+	    ws.onopen = function (e) {
+		update();
 	    }
 	}
     }
@@ -159,10 +167,10 @@ function CanvasClient(url) {
 function initBuffer(cols, rows, value) {
     arr = Array(cols);
     
-    for (x = 0; x < OLED_COLS; x++) {
-	var col = Array(OLED_ROWS);
+    for (x = 0; x < cols; x++) {
+	var col = Array(rows);
 
-	for (y = 0; y < OLED_ROWS; y++) {
+	for (y = 0; y < rows; y++) {
 	    col[y] = value;
 	}
 	

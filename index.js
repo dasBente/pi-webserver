@@ -2,9 +2,12 @@
  * This programm concerns itself with starting up and controlling all aspects and services of the webserver.
  */
 
-// We need a http server for any non-express functionallity
+// We need a http server for any non-express functionallity (e.g. web sockets)
 const http = require('http');
+
+// Load applications
 const app = require('./app');
+const oled = require('./oled/oled')(http);
 
 // Retrieve a port from environment to be used by this server
 const port = normalizePort(process.env.PORT || '8080');

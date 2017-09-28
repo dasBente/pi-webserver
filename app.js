@@ -27,6 +27,10 @@ app.get('/helloworld', function (req, res) {
     });
 });
 
+app.get('/oled', function (req, res) {
+    res.render('oled/oled', {});
+});
+
 // Forward any caught 404s to the error handler
 app.use(function (req, res, next) {
     let err = new Error('Not Found');

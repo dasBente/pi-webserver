@@ -1,0 +1,13 @@
+.toolbar button {
+    margin: 0px 5px 0px 5px;
+}
+
+canvas {
+    display: block;
+    outline: 1pt black;
+    width: 640px;
+    height: 320px;
+    border: 1px solid black;
+    box-sizing: content-box;
+}
+

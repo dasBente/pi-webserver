@@ -1,57 +1,55 @@
 const OLED_COLS = 128;
 const OLED_ROWS = 64;
 
+// Contains information about current state of the screen
+var screen = initBuffer(OLED_COLS, OLED_ROWS, 0); // TODO: Replace through server side initialization via ws
+
 $(function() {
     // Attach canvas controller to the canvas
-    var cc = CanvasController($('canvas'), OLED_COLS, OLED_ROWS);
-    cc.initEventhandler();
+    var contr = CanvasController($('canvas'), OLED_COLS, OLED_ROWS);
+
+    var url = "ws:"+ window.location.href.split(':')[1] +":8080/oled"
+    var cli = CanvasClient(url);
+
+    // Initialize Event handlers
+    contr.initEventHandler(cli);
+    cli.initEventHandler(contr);
     
-    cc.renderBuffer();
+    contr.renderBuffer();
 });
 
-// Creates a canvas controller which initializes and manages the canvas
+/* Creates a canvas controller which initializes and manages the canvas */
 function CanvasController(canvas, cols, rows) {
     var context = canvas.get(0).getContext("2d");
 
     // Contains information about last action performed
-    var buffer = initBuffer(cols, rows);
-
-    // Contains information about current state of the screen
-    var screen = initBuffer(cols, rows);
+    var buffer = initBuffer(cols, rows, -1);
     
     // Canvas dimensions
     var width = context.canvas.clientWidth, height = context.canvas.clientHeight;
     var cellWidth = width / cols, cellHeight = height / rows;
-    
-    /* Helperfunction to iterate over buffer */
-    var cellwise = function (lambda) {
-	for (x = 0; x < cols; x++) {
-	    for (y = 0; y < rows; y++) {
-		lambda(x,y);
-	    }
-	}
-    };
 
     // Write val to the buffer depending on mouse position 
     var screenToBuffer = function(x, y, val) {
 	x = Math.floor(x / cellWidth);
 	y = Math.floor(y / cellHeight);
 
-	console.log("Wrote %i to (%i, %i)", val, x, y);
-	
-	buffer[x][y] = val;
+	if (x >= 0 && x < cols && y >= 0 && y < rows) {
+	    buffer[x][y] = val;
+	}
     }
     
     return {
 	/* Render the entire oled buffer to the canvas */
 	renderBuffer: function (buf = screen) {
-	    context.clearRect(0, 0, width, height);
-
 	    var prevCol = context.fillStyle;
-	    context.fillStyle = "#000";
-
-	    cellwise(function (x,y) {
-		if (buf[x][y] == 0) {
+	    
+	    cellwise(buf, function (x,y) {
+		if (buf[x][y] == 0) { 
+		    context.fillStyle = "#000";
+		    context.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight)
+		} else if (buf[x][y] == 1) {
+		    context.fillStyle = "#fff";
 		    context.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight)
 		}
 	    });
@@ -86,10 +84,11 @@ function CanvasController(canvas, cols, rows) {
 	},
 
 	/* Initialize the canvas's event handling */
-	initEventhandler: function () {
+	initEventHandler: function (client) {
 	    // Current Mouse mode; 0 => released, 1 => held down
 	    var mouseDown = false;
-	    var obj = this;
+	    var controller = this;
+	    
 	    // Eventhandling
 	    canvas.on('mousedown', function () {
 		mouseDown = true;
@@ -98,26 +97,73 @@ function CanvasController(canvas, cols, rows) {
 	    canvas.on('mousemove', function (e) {
 		if (mouseDown) {
 		    screenToBuffer(e.offsetX, e.offsetY, 1);
+		    controller.renderBuffer(buffer);
 		}
 	    });
 	    
 	    $(window).on('mouseup', function (e) {
 		mouseDown = false;
-		obj.renderBuffer();
+		controller.renderBuffer(); // TODO: Remove later!
+		client.sendBuffer(buffer, 1);
 	    });
 	}
     }
 }
 
-/* Creates a new buffer filled with zeroes */
-function initBuffer(cols, rows) {
+/* Creates a Websocket client to communicate with a server */
+function CanvasClient(url) {
+    var ws = new WebSocket(url);
+    
+    return {
+	/* Process a canvas buffer and send it to the server*/
+	sendBuffer: function (buffer) {
+	    var on = [], off = [];
+
+	    cellwise(buffer, function (x, y) {
+		if (buffer[x][y] == 0) {
+		    off.push(x,y);
+		} else if (buffer[x][y] == 1)  {
+		    on.push(x,y);
+		}
+
+		// Delete buffer again
+		buffer[x][y] = -1;
+	    });
+
+	    if (on.length + off.length > 0) {
+		var msg = {
+		    type: "draw",
+		    on: on,
+		    off: off
+		};
+
+		ws.send(JSON.stringify(msg));
+	    }
+	},
+
+	/* Initialize the web sockets event handling */
+	initEventHandler: function (controller) {
+	    ws.onmessage = function (e) {
+		var msg = JSON.parse(e.data);
+
+		if (msg.type == 'screendata') {
+		    screen = msg.screen;
+		    controller.renderBuffer();
+		}
+	    }
+	}
+    }
+}
+
+/* Creates a new buffer filled with entries of value */
+function initBuffer(cols, rows, value) {
     arr = Array(cols);
     
     for (x = 0; x < OLED_COLS; x++) {
 	var col = Array(OLED_ROWS);
 
 	for (y = 0; y < OLED_ROWS; y++) {
-	    col[y] = 0;
+	    col[y] = value;
 	}
 	
 	arr[x] = col;
@@ -125,3 +171,12 @@ function initBuffer(cols, rows) {
 
     return arr;
 }
+
+/* Helperfunction to iterate over buffer */
+function cellwise(arr, lambda) {
+    for (x = 0; x < arr.length; x++) {
+	for (y = 0; y < arr[x].length; y++) {
+	    lambda(x,y);
+	}
+    }
+};

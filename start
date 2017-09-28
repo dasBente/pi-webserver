@@ -4,5 +4,5 @@ if [ ! -e ./oled_pipe ]; then
 	mkfifo ./oled_pipe
 fi
 
-nodejs index
-#tail -f ./oled_pipe | python3 ./oled/oled_parser.py
+nodejs index &
+tail -f ./oled_pipe | tee | python3 ./oled/oled_parser.py &

@@ -19,7 +19,6 @@
   "homepage": "https://github.com/dasbente/pi-webserver#readme",
   "dependencies": {
     "express": "^4.15.5",
-    "oled-js-pi": "^1.0.5",
     "pug": "^2.0.0-rc.4",
     "ws": "^3.2.0"
   },

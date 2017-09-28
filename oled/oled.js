@@ -34,10 +34,27 @@ module.exports = function (httpServer) {
 	    wss.broadcast(JSON.stringify({
 		screen: screen
 	    }));
+
+	    var on = [], off = [];
+
+	    for (x = 0; x < screen.length; x++) {
+		for (y = 0; y < screen[x].length; y++) {
+		    if (screen[x][y] == 0) {
+			off.push([x,y]);
+		    } else if (screen[x][y] == 1) {
+			on.push([x,y]);
+		    }
+		}
+	    }
+	    
+	    msg = {
+		on: on,
+		off: off
+	    };
 	    
 	    // Send data to oled_parser
 	    var cmd = toCommand(msg);
-
+	    
 	    if (!(cmd == "")) {
 		wstream = fs.createWriteStream('oled_pipe');
 		wstream.write(cmd +'\n');

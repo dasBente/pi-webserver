@@ -2,6 +2,8 @@ const WebSocket = require('ws');
 
 var screen = initBuffer(128, 64, 0);
 
+const fs = require('fs');
+
 module.exports = function (httpServer) {
     const wss = new WebSocket.Server({
 	//	server: httpServer
@@ -16,7 +18,7 @@ module.exports = function (httpServer) {
 	    }
 	});
     }
-    
+
     wss.on('connection', function (ws) {
 	ws.on('message', function (data) {
 	    var msg = JSON.parse(data);
@@ -35,8 +37,12 @@ module.exports = function (httpServer) {
 	    
 	    // Send data to oled_parser
 	    var cmd = toCommand(msg);
-	    
-	    console.log(cmd);
+
+	    if (!(cmd == "")) {
+		wstream = fs.createWriteStream('oled_pipe');
+		wstream.write(cmd +'\n');
+		wstream.close();
+	    }
 	});
     });
 }

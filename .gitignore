@@ -2,6 +2,9 @@
 *~
 \#*\# 
 
+# Named pipe
+oled_pipe
+
 # Logs
 logs
 *.log

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+node index
+tail -f oled_pipe | python3 -i oled_parser.py

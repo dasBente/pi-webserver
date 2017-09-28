@@ -1,3 +1,4 @@
+"use strict"
 /**
  * This programm concerns itself with starting up and controlling all aspects and services of the webserver.
  */
@@ -28,7 +29,7 @@ server.on('error', function (err) {
     }
 
     // Determine the type of the port used by our HTTP server
-    let bind = typeof port === 'string' ? 'Pipe '+ port : 'Port '+ port;
+    const bind = typeof port === 'string' ? 'Pipe '+ port : 'Port '+ port;
 
     switch (error.code) {
     case 'EACCES':

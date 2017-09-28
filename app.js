@@ -1,3 +1,4 @@
+"use strict"
 /**
  * This programm sets up anything around representation and navigation of this webserver. Essentially this 
  *  servers backbone.

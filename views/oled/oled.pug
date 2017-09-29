@@ -9,10 +9,15 @@ block scripts
 block content
   div(class="container")
     //- Toolbar
-    div(class="row mt-3 toolbar")
-      button(type="button" class="btn btn-light") Draw
-      button(type="button" class="btn btn-dark") Line
-      button(type="button" class="btn btn-dark") Rectangle
+    div(class="row mt-3")
+      button(type="button", class="btn btn-light", id="draw-btn") Draw
+      button(type="button", class="btn btn-dark", id="line-btn") Line
+      button(type="button", class="btn btn-dark", id="rect-btn") Rectangle
+      
+    //- Canvas options
+    div(class="row")
+      button(type="button" class="btn btn-light", id="col-btn") Switch Color
+      button(type="button" class="btn btn-primary", id="clear-btn") Clear  
       
     //- Canvas
     canvas(class="row mx-auto mt-2", width=640, height=320)

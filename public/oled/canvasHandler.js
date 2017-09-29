@@ -14,6 +14,24 @@ $(function() {
     // Initialize Event handlers
     contr.initEventHandler(cli);
     cli.initEventHandler(contr);
+
+    // Button events (Maybe new object to handle drawing logic?), also initialization
+    //  of event handlers has to refactored to be handled by the client and events
+    //  must be attached after the ws is ready!! (TODO: Later)
+    
+    $('#col-btn').on('click', function (e) {
+	if (contr.color !== 0 && contr.color !== 1) {
+	    throw "Invalid color: "+ contr.color;
+	}
+
+	// Toggle draw color and button color
+	contr.color = 1 - contr.color;
+	btnToggle($(this));
+    });
+
+    $('#clear-btn').on('click', function (e) {
+	cli.sendBuffer(initBuffer(OLED_COLS, OLED_ROWS, 0));
+    });
 });
 
 /* Creates a canvas controller which initializes and manages the canvas */
@@ -94,7 +112,7 @@ function CanvasController(canvas, cols, rows) {
 
 	    canvas.on('mousemove', function (e) {
 		if (mouseDown) {
-		    screenToBuffer(e.offsetX, e.offsetY, 1);
+		    screenToBuffer(e.offsetX, e.offsetY, controller.color);
 		    controller.renderBuffer(buffer);
 		}
 	    });
@@ -102,9 +120,12 @@ function CanvasController(canvas, cols, rows) {
 	    $(window).on('mouseup', function (e) {
 		mouseDown = false;
 		controller.renderBuffer(); // TODO: Remove later!
-		client.sendBuffer(buffer, 1);
+		client.sendBuffer(buffer);
 	    });
-	}
+	},
+
+	/* The currently selected color */
+	color: 1
     }
 }
 
@@ -188,3 +209,8 @@ function cellwise(arr, lambda) {
 	}
     }
 };
+
+/* Toggle the color of a given jquery button object */
+function btnToggle(jqueryBtn) {
+    jqueryBtn.toggleClass('btn-dark btn-light');
+}
